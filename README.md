@@ -16,8 +16,3 @@ sudo apt-get install python3-matplotlib
 ```sh
     python3 app.py [numero de vezes a rodar] [arquivo de entrada]
 ```
-
-
-# credito:
-Clonado e adadpato do [repositório de IgorLeal](https://github.com/igorlealantunes/APA)
-

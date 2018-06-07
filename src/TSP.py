@@ -247,7 +247,29 @@ class TSP:
 
 		return min_tour
 
-	def runVND(self, cities, M):
+	def _get_RCL(self, current_el, mapa, M, alpha):
+		"""
+		Controi a lista de bons candidatos.
+		Se alpha = 0 => vai ser uma lista totalmente gulosa (sem variacao)
+		se alpha = 1 => vaiser uma lista totalmente aleatoria
+		"""
+
+		costs_map = { key: self.distance_by_matrix(current_el, value, M) for (key, value) in mapa.items() }
+
+		key_max = max(costs_map.keys(), key=(lambda k: costs_map[k]))
+		key_min = min(costs_map.keys(), key=(lambda k: costs_map[k]))
+
+		min_cost = costs_map[key_min] # pior custo
+		max_cost = costs_map[key_max] # melhor custo
+
+		alpha_offset = min_cost + (alpha * (max_cost - min_cost))
+
+		RCL = [ mapa[k] for (k, v) in costs_map.items() if v <= alpha_offset ]
+
+		return RCL
+
+
+	def runGRASP(self, cities, M, alfa=0.5):
 		'''
 		Run VND
 
@@ -273,11 +295,19 @@ class TSP:
 		# while mapa has element
 		while len(mapa):
 
-			# append element into solution
-			current_el = random.choice(list(mapa.values())) #soluacao totalmente gulosa (sem RCL)
-			del mapa[current_el.id]
-			solution.append(current_el)
+			# limitate canidates.
+			# instead of considering all candidates, considere only a part
+			# ...
+			current_el = solution[-1]
+			rangeCandidates = self._get_RCL(current_el, mapa, M, alfa)
 
+			# append element into solution
+			current_el = random.choice(rangeCandidates) #soluacao totalmente gulosa (sem RCL)
+			
+			del mapa[current_el.id]
+
+			solution.append(current_el)
+			
 			cost = self.get_cost(solution, M)
 
 			VND_solution = self.VND(solution, M)

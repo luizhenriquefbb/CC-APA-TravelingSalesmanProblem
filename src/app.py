@@ -55,8 +55,9 @@ def main(argv):
 
 	for i in range(number_exec):
 		print("Attempt "+str(i))
-	
-		tour, custo_final = tsp.runVND(cities, M)
+
+		alpha = random.uniform(0, 1)
+		tour, custo_final = tsp.runGRASP(cities, M, alfa=alpha)
 
 		if custo_final < minimo:
 			print ("\nCusto: " + str(custo_final))
