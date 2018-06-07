@@ -54,20 +54,19 @@ def main(argv):
 	minimo = float("inf")
 
 	for i in range(number_exec):
-		#alpha = random.uniform(0, 1)
-		alpha = 0.5
-		grasp_tour = tsp.GRASP_TSP(cities, M, alpha)
-		custo_final = tsp.get_cost(grasp_tour, M)
+		print("Attempt "+str(i))
+	
+		tour, custo_final = tsp.runVND(cities, M)
 
 		if custo_final < minimo:
-			print ("\nAlpha : " + str(alpha) + " Custo GRASP: " + str(custo_final))
-			tsp.plot_cities(grasp_tour)
+			print ("\nCusto: " + str(custo_final))
+			tsp.plot_cities(tour)
 			minimo = custo_final
-	
+		
 
 	elapsed = timeit.default_timer() - start_time
 
-	# input("presse ENTER to continue")
+	input("presse ENTER to continue")
 	print ("Elapsed time : " + str(elapsed) + " s")
 	print ("---------------------------------------------\n\n")
 

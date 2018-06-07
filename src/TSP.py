@@ -105,6 +105,7 @@ class TSP:
 		print (string)
 
 	def plot_cities(self, cities):
+		""" show cities in a graph """
 		fig = plt.figure(figsize=(11, 6))
 		ax = fig.add_subplot(111)
 
@@ -120,6 +121,9 @@ class TSP:
 		plt.show(block = False)
 
 	def get_cost(self, tour, M):
+		'''
+		Return cost of a tour
+		'''
 		
 		deque_cities = collections.deque(tour)
 
@@ -168,8 +172,8 @@ class TSP:
 		
 		return min_tour
 
-	# mesma logica do 2opt, a mudanca agora ocorrem em 3 arestas 
 	def swap_3opt(self, tour, M):
+		""" mesma logica do 2opt, a mudanca agora ocorrem em 3 arestas  """
 		
 		min_cost = self.get_cost(tour, M)
 		min_tour = tour[:]
@@ -198,6 +202,9 @@ class TSP:
 		o processo com o 2opt. 
 		
 		ele so vai parar quando nen o 2opt nen o 3opt obtiverem resultados melhores
+
+		return
+			better tour
 		'''
 		
 		min_cost = self.get_cost(tour, M)
@@ -212,7 +219,8 @@ class TSP:
 			#print ("\nStarting 2opt...\n")
 			tour2opt = self.swap_2opt(min_tour, M)
 			cost2opt = self.get_cost(tour2opt, M)
-
+			
+			# Check if its better appling 2opt or not
 			if cost2opt < min_cost:
 				min_tour = tour2opt
 				min_cost = cost2opt
@@ -238,3 +246,48 @@ class TSP:
 						break
 
 		return min_tour
+
+	def runVND(self, cities, M):
+		'''
+		Run VND
+
+		Parameters:
+			cities: dictionay of cities
+			M: distance matrix
+
+		Return:
+			best tour in an array
+			respective cost
+		'''
+		mapa = {i.id: i for i in cities}
+
+		# best tour in an array
+		solution = []
+
+		first_el = mapa[1]
+		del mapa[1]
+
+		solution.append(first_el)
+		cost = 0.0
+
+		# while mapa has element
+		while len(mapa):
+
+			# append element into solution
+			current_el = random.choice(list(mapa.values())) #soluacao totalmente gulosa (sem RCL)
+			del mapa[current_el.id]
+			solution.append(current_el)
+
+			cost = self.get_cost(solution, M)
+
+			VND_solution = self.VND(solution, M)
+			VND_cost = self.get_cost(VND_solution, M)
+
+		# if gets better, update solution and cost
+		if VND_cost < cost:
+			solution = VND_solution
+			cost = VND_cost
+
+		solution.append(first_el)
+
+		return solution, cost
