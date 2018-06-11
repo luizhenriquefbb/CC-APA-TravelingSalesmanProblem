@@ -210,7 +210,6 @@ class TSP:
 		min_cost = self.get_cost(tour, M)
 		min_tour = tour[:]
 
-		size = len(tour)
 
 		cost3opt = float("inf")
 
@@ -244,6 +243,10 @@ class TSP:
 
 					elif cost3opt == min_cost: # se nao conseguir melhores resultados => volta pro 2opt
 						break
+			
+			# # chegou no minimo local (2opt e 3opt nao conseguiram nenhum improvment)
+			# elif cost3opt == min_cost:
+			# 	break
 
 		return min_tour
 
@@ -310,8 +313,8 @@ class TSP:
 			
 			cost = self.get_cost(solution, M)
 
-			VND_solution = self.VND(solution, M)
-			VND_cost = self.get_cost(VND_solution, M)
+		VND_solution = self.VND(solution, M)
+		VND_cost = self.get_cost(VND_solution, M)
 
 		# if gets better, update solution and cost
 		if VND_cost < cost:
