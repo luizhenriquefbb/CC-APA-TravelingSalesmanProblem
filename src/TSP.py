@@ -126,9 +126,10 @@ class TSP:
 		'''
 		
 		deque_cities = collections.deque(tour)
-
 		total_cost = 0
 
+		# Remove o elemento da lista deque_city e current_city recebe o objeto
+		# 
 		current_city = deque_cities.popleft()
 
 		while len(deque_cities):
@@ -141,12 +142,14 @@ class TSP:
 		return total_cost
 
 	def _swap(self, tour, i1, i2):
+		# copia todos os elementos de tour em clone
 		clone = tour[:]
-
+		# inverte valores
 		aux = clone[i1]
 		clone[i1] = clone[i2]
 		clone[i2] = aux
 
+		# Retorna clone
 		return clone
 
 	def swap_2opt(self, tour, M):
@@ -178,30 +181,33 @@ class TSP:
 		min_cost = self.get_cost(tour, M)
 		min_tour = tour[:]
 
+		# i começa em 1 e j em i+1
 		for i in range(1, len(min_tour) - 4 ):
 			for j in range(i + 1, len(min_tour) - 3 ):
-
+				
+				# Faz a troca entre 'i e j' e 'j e j+1'
 				new_tour = self._swap(min_tour, i, j)
 				new_tour2 = self._swap(new_tour, j, j+1)
+				# Calcula o novo custo dessa mudança
 				new_cost = self.get_cost(new_tour2, M)
 
 				#print("Trocando " + str(i) + " Com " + str(j) )
+				# Se o custo for menor, guarda o valor na variável min_cost e guarda o caminho
 				if new_cost < min_cost:
 					#print ("FOUND 3opt! : " + str(new_cost) )
 					min_cost = new_cost
 					min_tour = new_tour2
-		 
+		# Ao finalizar os dois laços 'for' retorna o melhor caminho
 		return min_tour
 
 	def VND(self, tour, M):
 		'''
 		O vnd tenta melhorar a rota utilizando os movimentos de vizinhanca 2opt e 3opt.
 		
-		O algoritmo ira utilizar o 2opt ate que se atinja um minimo local (sem mais melhorars),
-		apos o minimo local do 2opt, o 3opt eh chamado, Se houver ganhas na rota o algoritmo repete todo 
-		o processo com o 2opt. 
-		
-		ele so vai parar quando nen o 2opt nen o 3opt obtiverem resultados melhores
+		O algoritmo ira utilizar o 2opt ate que se atinja um minimo local (sem mais melhoras),
+		após o minimo local do 2opt, o 3opt eh chamado, Se houver ganho na rota o algoritmo 
+		repete todo o processo com o 2opt. 
+		Ele so vai parar quando nem o 2opt nen o 3opt obtiverem resultados melhores
 
 		return
 			better tour
@@ -216,10 +222,11 @@ class TSP:
 		while True:
 
 			#print ("\nStarting 2opt...\n")
+			# Roda 2opt
 			tour2opt = self.swap_2opt(min_tour, M)
 			cost2opt = self.get_cost(tour2opt, M)
 			
-			# Check if its better appling 2opt or not
+			# Checa se é melhor aplicar o 2opt, se for, volta pra 222
 			if cost2opt < min_cost:
 				min_tour = tour2opt
 				min_cost = cost2opt
@@ -244,7 +251,7 @@ class TSP:
 					elif cost3opt == min_cost: # se nao conseguir melhores resultados => volta pro 2opt
 						break
 			
-			# # chegou no minimo local (2opt e 3opt nao conseguiram nenhum improvment)
+			# # chegou no minimo local (2opt e 3opt nao conseguiram nenhuma melhora)
 			# elif cost3opt == min_cost:
 			# 	break
 
@@ -256,7 +263,7 @@ class TSP:
 		Se alpha = 0 => vai ser uma lista totalmente gulosa (sem variacao)
 		se alpha = 1 => vaiser uma lista totalmente aleatoria
 		"""
-
+		# Dicionario {id,custo} de custo da cidade atual para todas as cidades restantes
 		costs_map = { key: self.distance_by_matrix(current_el, value, M) for (key, value) in mapa.items() }
 
 		key_max = max(costs_map.keys(), key=(lambda k: costs_map[k]))
@@ -265,12 +272,13 @@ class TSP:
 		min_cost = costs_map[key_min] # pior custo
 		max_cost = costs_map[key_max] # melhor custo
 
+		# alpha é o limiar do custo desejado
 		alpha_offset = min_cost + (alpha * (max_cost - min_cost))
 
+		# RCL lista de obejeto (City.py) de cidades candidatas dentro do limiar alpha
 		RCL = [ mapa[k] for (k, v) in costs_map.items() if v <= alpha_offset ]
 
 		return RCL
-
 
 	def runGRASP(self, cities, M, alfa=0.5):
 		'''
@@ -281,41 +289,49 @@ class TSP:
 			M: distance matrix
 
 		Return:
+
 			best tour in an array
 			respective cost
 		'''
+		# Copia a lista Cities em forma de dicionario 'mapa'
 		mapa = {i.id: i for i in cities}
-
+		# Lista com melhor solução final
 		# best tour in an array
 		solution = []
 
-		first_el = mapa[1]
-		del mapa[1]
+		first_el = mapa[9]
+		del mapa[9]
 
 		solution.append(first_el)
 		cost = 0.0
 
-		# while mapa has element
+		# Enquanto houver elementos no mapa
 		while len(mapa):
 
-			# limitate canidates.
-			# instead of considering all candidates, considere only a part
+			# Limita os candidatos através de um limiar
+			# Considera apenas a parte dentro do limiar
 			# ...
 			current_el = solution[-1]
-			rangeCandidates = self._get_RCL(current_el, mapa, M, alfa)
+
+			# Quanto menor for o alfa, mais guloso será
+			rangeCandidates = self._get_RCL(current_el, mapa, M, alfa) 
 
 			# append element into solution
-			current_el = random.choice(rangeCandidates) #soluacao totalmente gulosa (sem RCL)
+			current_el = random.choice(rangeCandidates)
 			
+			# Deleta o elemento sorteado da lista mapa
+			# Só pode ser visitado uma única vez
 			del mapa[current_el.id]
-
+			
+			# Aumenta o tamanho da lista e adiciona na ultima posição o elemento sorteado
 			solution.append(current_el)
 			
 			cost = self.get_cost(solution, M)
 
+		# Menor Tour (Tour = solution quando finalizar a execução)
 		VND_solution = self.VND(solution, M)
+		# Menor custo, proveniente do menor tour
 		VND_cost = self.get_cost(VND_solution, M)
-
 		# if gets better, update solution and cost
 		if VND_cost < cost:
 			solution = VND_solution
