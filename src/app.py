@@ -43,8 +43,8 @@ def main(argv):
 	tsp = TSP()
 	M = tsp.get_distance_matrix(cities)
 	
-	# print matrix of distances
-	# tsp.pretty_print(M)
+	print ("matrix of distances")
+	tsp.pretty_print(M)
 	# exit()
 
 	print ("Executing " + str(number_exec) + " times on : " + str(filename) )

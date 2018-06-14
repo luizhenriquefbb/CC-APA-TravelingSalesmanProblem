@@ -162,8 +162,8 @@ class TSP:
 		min_cost = self.get_cost(tour, M)
 		min_tour = tour[:]
 
-		for i in range(1, len(min_tour) - 3 ):
-			for j in range(i + 1, len(min_tour) - 2 ):
+		for i in range(1, len(min_tour) - 1 ):
+			for j in range(i + 1, len(min_tour) ):
 
 				new_tour = self._swap(min_tour, i, j)
 				new_cost = self.get_cost(new_tour, M)
@@ -182,21 +182,22 @@ class TSP:
 		min_tour = tour[:]
 
 		# i começa em 1 e j em i+1
-		for i in range(1, len(min_tour) - 4 ):
-			for j in range(i + 1, len(min_tour) - 3 ):
+		for i in range(1, len(min_tour) - 2 ):
+			for j in range(i + 1, len(min_tour) - 1 ):
+				for k in range(j + 1, len(min_tour)):
 				
-				# Faz a troca entre 'i e j' e 'j e j+1'
-				new_tour = self._swap(min_tour, i, j)
-				new_tour2 = self._swap(new_tour, j, j+1)
-				# Calcula o novo custo dessa mudança
-				new_cost = self.get_cost(new_tour2, M)
+					# Faz a troca entre 'i e j' e 'j e j+1'
+					new_tour = self._swap(min_tour, i, j)
+					new_tour2 = self._swap(new_tour, j, k)
+					# Calcula o novo custo dessa mudança
+					new_cost = self.get_cost(new_tour2, M)
 
-				#print("Trocando " + str(i) + " Com " + str(j) )
-				# Se o custo for menor, guarda o valor na variável min_cost e guarda o caminho
-				if new_cost < min_cost:
-					#print ("FOUND 3opt! : " + str(new_cost) )
-					min_cost = new_cost
-					min_tour = new_tour2
+					#print("Trocando " + str(i) + " Com " + str(j) )
+					# Se o custo for menor, guarda o valor na variável min_cost e guarda o caminho
+					if new_cost < min_cost:
+						#print ("FOUND 3opt! : " + str(new_cost) )
+						min_cost = new_cost
+						min_tour = new_tour2
 		# Ao finalizar os dois laços 'for' retorna o melhor caminho
 		return min_tour
 
@@ -263,20 +264,31 @@ class TSP:
 		Se alpha = 0 => vai ser uma lista totalmente gulosa (sem variacao)
 		se alpha = 1 => vaiser uma lista totalmente aleatoria
 		"""
+		# costs_map = { key: self.distance_by_matrix(current_el, value, M) for (key, value) in mapa.items() }
+		costs_map = {}
+
 		# Dicionario {id,custo} de custo da cidade atual para todas as cidades restantes
-		costs_map = { key: self.distance_by_matrix(current_el, value, M) for (key, value) in mapa.items() }
+		# Varre todo o conjunto (Id, cidade) das cidades nao visitadas
+		# 'value' e o objeto cidade 
+		for (key, value) in mapa.items():
+			costs_map[key] = self.distance_by_matrix(current_el, value, M)
 
-		key_max = max(costs_map.keys(), key=(lambda k: costs_map[k]))
-		key_min = min(costs_map.keys(), key=(lambda k: costs_map[k]))
+		min_cost = min(costs_map.values()) # pior custo
+		max_cost = max(costs_map.values()) # melhor custo
 
-		min_cost = costs_map[key_min] # pior custo
-		max_cost = costs_map[key_max] # melhor custo
 
 		# alpha é o limiar do custo desejado
 		alpha_offset = min_cost + (alpha * (max_cost - min_cost))
 
 		# RCL lista de obejeto (City.py) de cidades candidatas dentro do limiar alpha
-		RCL = [ mapa[k] for (k, v) in costs_map.items() if v <= alpha_offset ]
+		#RCL = [ mapa[k] for (k, v) in costs_map.items() if v <= alpha_offset ]
+
+		RCL = []
+
+		# percorre o dicionario de custo comparando o value com o offset
+		for (key, value) in costs_map.items():
+			if value <= alpha_offset:
+				RCL.append(mapa[key])
 
 		return RCL
 
@@ -299,8 +311,8 @@ class TSP:
 		# best tour in an array
 		solution = []
 
-		first_el = mapa[9]
-		del mapa[9]
+		first_el = mapa[1]
+		del mapa[1]
 
 		solution.append(first_el)
 		cost = 0.0
